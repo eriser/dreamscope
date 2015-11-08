@@ -50,7 +50,6 @@ public:
     double cyclesPerSample = baseFreq / getSampleRate();
     samplingFrequency = getSampleRate();
 
-    //phaseDelta = cyclesPerSample * 2.0 * double_Pi;
     phaseDelta = cyclesPerSample;
     stopped = false;
     playing = true;
@@ -91,8 +90,6 @@ public:
         for (int i = 0; i < 64; i++)
         {
           int n = i + 1;
-          float baseAngle = currentPhase * 2 * double_Pi;
-          float angle = baseAngle * n;
           float harmonicLevel;
           if (!stopped)
           {
@@ -108,7 +105,6 @@ public:
           {
             harmonicLevel = getADSRValueStopped(stoppedLevel[i], processor->releaseTimes[i], currentTime);
           }
-          //currentSample += (float)(sin(angle) * (level * harmonicLevel));
           currentSample += getWavetableValue(currentPhase * n) * level * harmonicLevel;
         }
 
