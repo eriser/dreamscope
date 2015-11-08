@@ -16,28 +16,20 @@
 //==============================================================================
 DreamscopeAudioProcessor::DreamscopeAudioProcessor()
 {
-  attackTimes = (float*)malloc(64 * sizeof(float));
-  memset(attackTimes, 0, 64 * sizeof(float));
-  attackLevels = (float*)malloc(64 * sizeof(float));
-  memset(attackLevels, 0, 64 * sizeof(float));
-  decayTimes = (float*)malloc(64 * sizeof(float));
-  memset(decayTimes, 0, 64 * sizeof(float));
-  decayLevels = (float*)malloc(64 * sizeof(float));
-  memset(decayLevels, 0, 64 * sizeof(float));
-  sustainTimes = (float*)malloc(64 * sizeof(float));
-  memset(sustainTimes, 0, 64 * sizeof(float));
-  releaseTimes = (float*)malloc(64 * sizeof(float));
-  memset(releaseTimes, 0, 64 * sizeof(float));
-
-  wavetable = (float*)malloc(2048 * sizeof(float));
   for (int i = 0; i < 2048; i++)
   {
     double phase = (double)i / 2048;
     wavetable[i] = (float)sin(double_Pi * 2 * phase);
   }
 
-  const int numVoices = 16;
+  memset(attackTimes, 0, sizeof(float) * 64);
+  memset(attackLevels, 0, sizeof(float) * 64);
+  memset(decayTimes, 0, sizeof(float) * 64);
+  memset(decayLevels, 0, sizeof(float) * 64);
+  memset(sustainTimes, 0, sizeof(float) * 64);
+  memset(releaseTimes, 0, sizeof(float) * 64);
 
+  const int numVoices = 10;
   // Add some voices...
   for (int i = numVoices; --i >= 0;)
     synth.addVoice(new AdditiveVoice(this));
@@ -48,15 +40,7 @@ DreamscopeAudioProcessor::DreamscopeAudioProcessor()
 }
 
 DreamscopeAudioProcessor::~DreamscopeAudioProcessor()
-{
-  free(attackTimes);
-  free(attackLevels);
-  free(decayTimes);
-  free(decayLevels);
-  free(sustainTimes);
-  free(releaseTimes);
-  free(wavetable);
-}
+{ }
 
 //==============================================================================
 const String DreamscopeAudioProcessor::getName() const

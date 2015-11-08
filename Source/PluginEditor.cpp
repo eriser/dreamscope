@@ -26,7 +26,7 @@ DreamscopeAudioProcessorEditor::DreamscopeAudioProcessorEditor(DreamscopeAudioPr
     levels[i] = 1.0f / (i + 1);
   }
 
-  tabs = new TabbedComponent(TabbedButtonBar::Orientation::TabsAtTop);
+  tabs = new TabbedComponent(TabbedButtonBar::Orientation::TabsAtLeft);
   attackTimeSliders = new MultiSliderComponent(64, 11);
   attackTimeSliders->setListener(this);
 

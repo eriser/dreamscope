@@ -22,6 +22,23 @@ public:
   bool appliesToChannel(int /*midiChannel*/) override { return true; }
 };
 
+struct LFO
+{
+  float currentPhase;
+  float phaseDelta;
+
+  typedef enum
+  {
+    Sine,
+    RisingSawtooth,
+    FallingSawtooth,
+    Triangle,
+    Square
+  } Waveform;
+
+  Waveform waveform;
+};
+
 class AdditiveVoice : public SynthesiserVoice
 {
 public:
@@ -30,6 +47,14 @@ public:
   {
     memset(stoppedLevel, 0, 64 * sizeof(float));
     memset(adsrLevels, 0, 64 * sizeof(float));
+    wavetable = processor->wavetable;
+
+    samplingFrequency = getSampleRate();
+
+    maxAttackTime = 10 * samplingFrequency;
+    maxDecayTime = 5 * samplingFrequency;
+    maxReleaseTime = 10 * samplingFrequency;
+    maxSustainTime = 20 * samplingFrequency;
   }
 
   bool canPlaySound(SynthesiserSound* sound) override
@@ -41,14 +66,19 @@ public:
     SynthesiserSound* /*sound*/,
     int /*currentPitchWheelPosition*/) override
   {
+    midiNote = midiNoteNumber;
     currentPhase = 0.0;
     currentTime = 0.0;
     level = velocity * 0.15;
-    tailOff = 0.0;
 
     baseFreq = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
     double cyclesPerSample = baseFreq / getSampleRate();
     samplingFrequency = getSampleRate();
+
+    maxAttackTime = 10 * samplingFrequency;
+    maxDecayTime = 5 * samplingFrequency;
+    maxReleaseTime = 10 * samplingFrequency;
+    maxSustainTime = 20 * samplingFrequency;
 
     phaseDelta = cyclesPerSample;
     stopped = false;
@@ -90,23 +120,23 @@ public:
         for (int i = 0; i < 64; i++)
         {
           int n = i + 1;
-          float harmonicLevel;
-          if (!stopped)
+          if (phaseDelta * n >= 0.5)
           {
-            harmonicLevel = getADSRValue(processor->attackTimes[i],
-              processor->attackLevels[i],
-              processor->decayTimes[i],
-              processor->decayLevels[i],
-              processor->sustainTimes[i],
-              processor->releaseTimes[i], currentTime);
-            adsrLevels[i] = harmonicLevel;
+            // By eliminating all the frequencies above the Nyquist frequency
+            // we also eliminate aliasing. And we save CPU cycles. Woo!
+            goto exit;
           }
-          else
-          {
-            harmonicLevel = getADSRValueStopped(stoppedLevel[i], processor->releaseTimes[i], currentTime);
-          }
+
+          float harmonicLevel = getADSRValue(processor->attackTimes[i],
+            processor->attackLevels[i],
+            processor->decayTimes[i],
+            processor->decayLevels[i],
+            processor->sustainTimes[i],
+            processor->releaseTimes[i], currentTime, stoppedLevel[i]);
+          adsrLevels[i] = harmonicLevel;
           currentSample += getWavetableValue(currentPhase * n) * level * harmonicLevel;
         }
+      exit:
 
         for (int i = outputBuffer.getNumChannels(); --i >= 0;)
           outputBuffer.addSample(i, startSample, currentSample);
@@ -122,9 +152,27 @@ public:
     }
   }
 
-  void pitchWheelMoved(int /*newValue*/) override
+  void pitchWheelMoved(int newValue) override
   {
-    // not implemented for the purposes of this demo!
+    if (!stopped)
+    {
+      int lowerPitch = -2;
+      int higherPitch = +2;
+      float lowerPitchFreq = MidiMessage::getMidiNoteInHertz(midiNote + lowerPitch);
+      float higherPitchFreq = MidiMessage::getMidiNoteInHertz(midiNote + higherPitch);
+
+      int offset = newValue - 0x1fff;
+      if (offset < 0)
+      {
+        float newFreq = lerp(baseFreq, lowerPitchFreq, -((float)offset / 0x1fff));
+        phaseDelta = newFreq / samplingFrequency;
+      }
+      else
+      {
+        float newFreq = lerp(baseFreq, higherPitchFreq, ((float)offset / 0x1fff));
+        phaseDelta = newFreq / samplingFrequency;
+      }
+    }
   }
 
   void controllerMoved(int /*controllerNumber*/, int /*newValue*/) override
@@ -133,12 +181,14 @@ public:
   }
 
 private:
-  double currentPhase, phaseDelta, level, tailOff, baseFreq;
+  double currentPhase, phaseDelta, level, baseFreq;
   double samplingFrequency, currentTime;
   float adsrLevels[64];
   bool stopped;
   bool playing;
   float stoppedLevel[64];
+  float* wavetable;
+  int midiNote;
 
   DreamscopeAudioProcessor* processor;
 
@@ -147,23 +197,33 @@ private:
     return (1 - w) * a + w * b;
   }
 
-  float getADSRValue(float atkT, float atkL, float decT, float decL, float susT, float relT, float t)
-  {
-    // Times in seconds
-    float maxAttackTime = 10 * samplingFrequency;
-    float maxDecayTime = 5 * samplingFrequency;
-    float maxReleaseTime = 10 * samplingFrequency;
+  // Times in seconds
+  float maxAttackTime;
+  float maxDecayTime;
+  float maxReleaseTime;
+  float maxSustainTime;
 
+  float getADSRValue(float atkT, float atkL, float decT, float decL, float susT, float relT, float t, float lastValue)
+  {
     float attackTime = maxAttackTime * atkT;
     float decayTime = maxDecayTime * decT;
-    float sustainTime = abs((susT / (susT - 1)));
+    float sustainTime = (susT == 1 ? INFINITY : susT * maxSustainTime);
     float releaseTime = maxReleaseTime * relT;
+    if (stopped)
+    {
+      if (relT == 0)
+      {
+        return 0;
+      }
 
-    // For sustain times we use the function
-    //             |    x    |
-    // length(x) = | ------- |
-    //             | (x - 1) |
-    // So that for an x of 1.0, we get infinite sustain
+      float pos = t / releaseTime;
+      if (pos > 1)
+      {
+        return 0;
+      }
+
+      return lerp(lastValue, 0, pos);
+    }
 
     if (t < attackTime)
     {
@@ -186,38 +246,21 @@ private:
     else
     {
       // Release phase
+      if (releaseTime == 0)
+      {
+        return 0;
+      }
+
       float t2 = t - (attackTime + decayTime + sustainTime);
       float pos = t2 / releaseTime;
-      if (releaseTime == 0)
-        return 0;
 
       return lerp(decL, 0, pos);
     }
   }
 
-  float getADSRValueStopped(float lastValue, float relT, float timeFromStop)
+  inline float getWavetableValue(float phase)
   {
-    if (relT == 0)
-    {
-      return 0;
-    }
-
-    float maxReleaseTime = 10 * samplingFrequency;
-    float releaseTime = maxReleaseTime * relT;
-
-    float pos = timeFromStop / releaseTime;
-    if (pos > 1)
-    {
-      return 0;
-    }
-
-    return lerp(lastValue, 0, pos);
-  }
-
-  float getWavetableValue(float phase)
-  {
-    int index = ((int)(phase * 2048) % 2047);
-    return processor->wavetable[index];
+    return wavetable[((int)(phase * 2048) % 2048)];
   }
 };
 

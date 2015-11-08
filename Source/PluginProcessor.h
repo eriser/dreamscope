@@ -58,14 +58,14 @@ public:
   void getStateInformation(MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
 
-  float* attackTimes;
-  float* attackLevels;
-  float* decayTimes;
-  float* decayLevels;
-  float* sustainTimes;
-  float* releaseTimes;
+  float attackTimes[64];
+  float attackLevels[64];
+  float decayTimes[64];
+  float decayLevels[64];
+  float sustainTimes[64];
+  float releaseTimes[64];
 
-  float* wavetable;
+  float wavetable[2048];
 
 private:
   //==============================================================================
