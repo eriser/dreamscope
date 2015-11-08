@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="nsbOV0" name="Dreamscope" projectType="audioplug" version="1.0.0"
+              bundleIdentifier="com.bertolaccini.Dreamscope" includeBinaryInAppConfig="1"
+              buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="0"
+              pluginName="Dreamscope" pluginDesc="Dreamscope" pluginManufacturer="Francesco Bertolaccini"
+              pluginManufacturerCode="Fbrt" pluginCode="Drms" pluginChannelConfigs="{0, 1}, {0, 2}"
+              pluginIsSynth="1" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
+              pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="DreamscopeAU" pluginRTASCategory="" aaxIdentifier="com.bertolaccini.Dreamscope"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.0.1"
+              companyName="Francesco Bertolaccini" companyEmail="bertolaccinifrancesco@gmail.com">
+  <MAINGROUP id="sget0x" name="Dreamscope">
+    <GROUP id="{D03C9087-B38C-2019-438E-35E6CB8D491B}" name="Source">
+      <FILE id="ZSI1dn" name="ADSREditor.cpp" compile="1" resource="0" file="Source/ADSREditor.cpp"/>
+      <FILE id="rVPJWp" name="ADSREditor.h" compile="0" resource="0" file="Source/ADSREditor.h"/>
+      <FILE id="QlqqVa" name="ADSRViewer.cpp" compile="1" resource="0" file="Source/ADSRViewer.cpp"/>
+      <FILE id="aEC953" name="ADSRViewer.h" compile="0" resource="0" file="Source/ADSRViewer.h"/>
+      <FILE id="gKmG0Y" name="LFOEditorComponent.cpp" compile="1" resource="0"
+            file="Source/LFOEditorComponent.cpp"/>
+      <FILE id="WMJ4Md" name="LFOEditorComponent.h" compile="0" resource="0"
+            file="Source/LFOEditorComponent.h"/>
+      <FILE id="roLcPs" name="MultiSliderComponent.h" compile="0" resource="0"
+            file="Source/MultiSliderComponent.h"/>
+      <FILE id="uVX8Wa" name="MultiSliderComponent.cpp" compile="1" resource="0"
+            file="Source/MultiSliderComponent.cpp"/>
+      <FILE id="CPiGYn" name="AdditiveSynth.h" compile="0" resource="0" file="Source/AdditiveSynth.h"/>
+      <FILE id="ftA53O" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="u2SoNe" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="FwePpz" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="FgEY8t" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="C:/Users/Francesco/SDKs/VST3 SDK/"
+            vst3Folder="C:/Users/Francesco/SDKs/VST3 SDK/">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="Dreamscope"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="Dreamscope"/>
+        <CONFIGURATION name="Debug64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="Dreamscope" postbuildCommand="xcopy &quot;$(TargetPath)&quot; &quot;D:\VSTPlugins&quot; /Y"/>
+        <CONFIGURATION name="Release64" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="Dreamscope"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_events" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_graphics" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_data_structures" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_opengl" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="D:/Downloads/juce-grapefruit-windows/modules"/>
+      </MODULEPATHS>
+    </VS2015>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS enableCxx11="1"/>
+  </LIVE_SETTINGS>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+</JUCERPROJECT>
